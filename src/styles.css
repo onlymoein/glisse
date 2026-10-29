@@ -1,9 +1,14 @@
 :where(:root, [data-theme="light"]) {
   --lg-foreground: rgb(0 0 0 / 0.88);
   --lg-muted: rgb(60 60 67 / 0.6);
-  --lg-glass: rgb(255 255 255 / 0.6);
+  --lg-transparency: 0.5;
+  /* How bright the rim highlight is. iOS 27 brightened it; 1 is the iOS 26 rim. */
+  --lg-shine: 1.4;
+  --lg-glass-clear: rgb(255 255 255 / 0.2);
+  --lg-glass-tinted: rgb(247 247 249 / 0.96);
   --lg-glass-active: rgb(236 236 240 / 0.85);
   --lg-edge: rgb(0 0 0 / 0.08);
+  --lg-shade: rgb(0 0 0 / 0.1);
   --lg-drop: rgb(0 0 0 / 0.06);
   --lg-selection: rgb(0 0 0 / 0.1);
   --lg-lens: rgb(255 255 255 / 0.3);
@@ -24,9 +29,11 @@
 :where([data-theme="dark"]) {
   --lg-foreground: rgb(255 255 255);
   --lg-muted: rgb(235 235 245 / 0.6);
-  --lg-glass: rgb(40 40 40 / 0.62);
+  --lg-glass-clear: rgb(40 40 40 / 0.26);
+  --lg-glass-tinted: rgb(30 30 32 / 0.95);
   --lg-glass-active: rgb(70 70 70 / 0.62);
   --lg-edge: rgb(255 255 255 / 0.08);
+  --lg-shade: rgb(0 0 0 / 0.45);
   --lg-drop: transparent;
   --lg-selection: rgb(255 255 255 / 0.145);
   --lg-lens: rgb(255 255 255 / 0.055);
@@ -47,9 +54,11 @@
   :where(:root:not([data-theme="light"])) {
     --lg-foreground: rgb(255 255 255);
     --lg-muted: rgb(235 235 245 / 0.6);
-    --lg-glass: rgb(40 40 40 / 0.62);
+    --lg-glass-clear: rgb(40 40 40 / 0.26);
+    --lg-glass-tinted: rgb(30 30 32 / 0.95);
     --lg-glass-active: rgb(70 70 70 / 0.62);
     --lg-edge: rgb(255 255 255 / 0.08);
+    --lg-shade: rgb(0 0 0 / 0.45);
     --lg-drop: transparent;
     --lg-selection: rgb(255 255 255 / 0.145);
     --lg-lens: rgb(255 255 255 / 0.055);
@@ -69,15 +78,26 @@
 
 /* Glass */
 
+/* `--lg-transparency` runs from 0, fully tinted, to 1, fully clear, like the
+   iOS 27 setting. It's worked out on each glass so it can be set anywhere above. */
 .lg-glass {
+  --lg-glass: color-mix(
+    in srgb,
+    var(--lg-glass-clear) calc(var(--lg-transparency) * 100%),
+    var(--lg-glass-tinted)
+  );
+  --lg-blur: calc(2px + (1 - var(--lg-transparency)) * 12px);
   position: relative;
   background-color: var(--lg-glass);
   background-image: var(--lg-rim, none);
   background-size: 100% 100%;
-  -webkit-backdrop-filter: blur(var(--lg-blur, 3px)) var(--lg-filter, saturate(1.5));
-  backdrop-filter: blur(var(--lg-blur, 3px)) var(--lg-filter, saturate(1.5));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) var(--lg-filter, saturate(1.5));
+  backdrop-filter: blur(var(--lg-blur)) var(--lg-filter, saturate(1.5));
+  /* The darker edge sets the glass apart from what's behind it. */
   box-shadow:
     inset 0 0 0 0.5px var(--lg-edge),
+    0 0 0 0.5px var(--lg-shade),
+    inset 0 0 2px var(--lg-shade),
     0 1px 3px var(--lg-drop);
 }
 
@@ -813,5 +833,20 @@
 @keyframes lg-menu-fade {
   from {
     opacity: 0;
+  }
+}
+
+/* Reduce Transparency and Increase Contrast win over any transparency the app
+   sets, as they do on iOS. */
+@media (prefers-reduced-transparency: reduce) {
+  .lg-glass {
+    --lg-transparency: 0;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .lg-glass {
+    --lg-transparency: 0;
+    --lg-edge: color-mix(in srgb, var(--lg-foreground) 45%, transparent);
   }
 }

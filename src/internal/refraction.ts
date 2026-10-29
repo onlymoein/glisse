@@ -14,6 +14,7 @@ interface Shape {
   level: number;
   zoom: number;
   saturation: number;
+  shine: number;
 }
 
 const lenses = new Map<string, Lens>();
@@ -122,7 +123,7 @@ function maps(width: number, height: number, radius: number, selection: boolean,
         const bloom = Math.exp(-((distance / (bezel * 0.22)) ** 2));
         alpha = rim * (0.045 + 0.52 * glint + 0.2 * reflected) + bloom * 0.02 * glint;
       }
-      shine.data[i + 3] = Math.round(clamp(alpha, 0, 1) * 255);
+      shine.data[i + 3] = Math.round(clamp(alpha * shape.shine, 0, 1) * 255);
     }
   }
 
@@ -251,6 +252,7 @@ function fit(element: HTMLElement, selection: boolean, filtered: boolean): void 
     level: length("--lg-refraction") ?? 1,
     zoom: Math.max(1, length("--lg-zoom") ?? 1),
     saturation: Math.max(1, length("--lg-rim-saturation") ?? 1),
+    shine: Math.max(0, length("--lg-shine") ?? 1),
   };
   const { filter, rim } = lens(width, height, radius, selection, shape);
   if (filtered) element.style.setProperty("--lg-filter", filter);
