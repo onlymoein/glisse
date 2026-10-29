@@ -45,9 +45,6 @@ test("skips disabled items with the arrow keys", () => {
 });
 
 test("opens and closes when its owner says so", async () => {
-  // Let a frame left running by an earlier test end, or the springs would
-  // wait on it instead of on the fake clock.
-  await new Promise(requestAnimationFrame);
   vi.useFakeTimers();
   const { rerender } = render(<Menu aria-label="Options" items={[{ label: "Pin" }]} open />);
   expect(screen.getByRole("menu", { name: "Options" })).toBeTruthy();
