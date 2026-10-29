@@ -836,6 +836,72 @@
   }
 }
 
+/* Toolbar */
+
+.lg-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+}
+
+/* The band behind the bar shows once content has scrolled under it. */
+.lg-toolbar[data-edge]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -24px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--lg-ease);
+}
+
+.lg-toolbar[data-scrolled]::before {
+  opacity: 1;
+}
+
+.lg-toolbar[data-edge="uniform"]::before {
+  background: color-mix(in srgb, var(--lg-glass-tinted) 72%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+}
+
+.lg-toolbar[data-edge="soft"]::before {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(#000 40%, transparent);
+  mask-image: linear-gradient(#000 40%, transparent);
+}
+
+.lg-toolbar-group {
+  display: flex;
+  align-items: center;
+  border-radius: 22px;
+  padding: 2px;
+}
+
+/* Buttons in a group share its glass instead of each having their own. */
+.lg-toolbar-group > .lg-button:not([data-variant="filled"]) {
+  background-image: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.lg-toolbar-group > .lg-button:not([data-variant="filled"], :active, [data-pressed], :hover) {
+  background-color: transparent;
+}
+
+.lg-toolbar-group > .lg-glass-copy {
+  display: none;
+}
+
 /* Reduce Transparency and Increase Contrast win over any transparency the app
    sets, as they do on iOS. */
 @media (prefers-reduced-transparency: reduce) {

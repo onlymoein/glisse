@@ -11,3 +11,4 @@ export { SearchField, type SearchFieldProps } from "./search-field";
 export { Slider, type SliderProps } from "./slider";
 export { Switch, type SwitchProps } from "./switch";
 export { TabBar, type TabBarItem, type TabBarProps } from "./tab-bar";
+export { Toolbar, ToolbarGroup, type ToolbarGroupProps, type ToolbarProps } from "./toolbar";
