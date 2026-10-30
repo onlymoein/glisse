@@ -1,5 +1,5 @@
 {
-  "name": "liquidglass",
+  "name": "@onlymoein/liquidglass",
   "version": "0.5.0",
   "description": "Apple's iOS 27 Liquid Glass for React.",
   "keywords": [
@@ -75,5 +75,8 @@
     "tsdown": "^0.23.2",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

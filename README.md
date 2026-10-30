@@ -9,13 +9,13 @@ It started as a fork of [glisse](https://github.com/0kzh/glisse) by Kelvin Zhang
 Install it:
 
 ```bash
-npm install liquidglass
+npm install @onlymoein/liquidglass
 ```
 
 Then use the components anywhere. Their styles come with them.
 
 ```tsx
-import { Button, Switch } from "liquidglass";
+import { Button, Switch } from "@onlymoein/liquidglass";
 
 function Settings() {
   return (
@@ -47,7 +47,7 @@ Controls with a value take it controlled (`value` / `checked` / `open` with a ch
 ### Toolbar
 
 ```tsx
-import { Button, Toolbar, ToolbarGroup } from "liquidglass";
+import { Button, Toolbar, ToolbarGroup } from "@onlymoein/liquidglass";
 
 <Toolbar aria-label="Notes">
   <ToolbarGroup aria-label="Navigation">
@@ -99,7 +99,7 @@ Without it, those browsers keep the blur and the rim highlight but don't bend.
 
 ## Coming from glisse
 
-The components and their props are the same. Install `liquidglass` and change your imports, and rename `data-glisse-backdrop` to `data-liquidglass-backdrop`. If you restyled the glass by setting `--lg-glass`, set `--lg-glass-clear` and `--lg-glass-tinted` instead.
+The components and their props are the same. Install `@onlymoein/liquidglass` and change your imports, and rename `data-glisse-backdrop` to `data-liquidglass-backdrop`. If you restyled the glass by setting `--lg-glass`, set `--lg-glass-clear` and `--lg-glass-tinted` instead.
 
 ## License
 
