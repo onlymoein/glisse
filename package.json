@@ -1,26 +1,31 @@
 {
-  "name": "glisse",
+  "name": "liquidglass",
   "version": "0.4.3",
-  "description": "A faithful implementation of Apple's Liquid Glass for the web.",
+  "description": "Apple's iOS 27 Liquid Glass for React.",
   "keywords": [
     "react",
     "liquid glass",
+    "ios 27",
     "glass",
     "ui",
     "components",
     "tab bar",
+    "toolbar",
     "switch",
     "slider",
     "menu"
   ],
   "license": "MIT",
-  "author": "Kelvin Zhang <me@kelvinzhang.ca>",
-  "homepage": "https://glisse.kelvinzhang.ca",
+  "author": "Moein Saharkhiz (https://github.com/onlymoein)",
+  "contributors": [
+    "Kelvin Zhang <me@kelvinzhang.ca> (https://github.com/0kzh)"
+  ],
+  "homepage": "https://github.com/onlymoein/glisse#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0kzh/glisse.git"
+    "url": "git+https://github.com/onlymoein/glisse.git"
   },
-  "bugs": "https://github.com/0kzh/glisse/issues",
+  "bugs": "https://github.com/onlymoein/glisse/issues",
   "type": "module",
   "sideEffects": [
     "*.css",

@@ -147,7 +147,7 @@ function lens(width: number, height: number, radius: number, selection: boolean,
   if (cached) return cached;
 
   const { displacement, highlight, zoom, scale } = maps(width, height, radius, selection, shape);
-  const id = `glisse-${lenses.size}`;
+  const id = `liquidglass-${lenses.size}`;
   const box = { x: 0, y: 0, width, height };
   const filter = svg("filter", {
     id,
@@ -289,7 +289,7 @@ function refract(element: HTMLElement, selection: boolean, filtered: boolean): (
   };
 }
 
-const MARK = "data-glisse-backdrop";
+const MARK = "data-liquidglass-backdrop";
 
 // The part of an element that can be seen, cut down by every ancestor that
 // clips its overflow (a large image inside a small scroller shows only the scroller).
@@ -596,7 +596,7 @@ function copyBackdrop(element: HTMLElement, source: HTMLElement): () => void {
 
 /**
  * Refracts what's behind the element. Chromium filters the live backdrop.
- * Safari and Firefox filter a copy of content marked `data-glisse-backdrop`
+ * Safari and Firefox filter a copy of content marked `data-liquidglass-backdrop`
  * nearby, and otherwise keep the blur with the rim highlight.
  */
 export function useRefraction(ref: RefObject<HTMLElement | null>, selection = false): void {

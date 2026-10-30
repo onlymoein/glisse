@@ -27,6 +27,6 @@ test("passes range attributes through", () => {
 });
 
 test("keeps a touch on the thumb from scrolling the page", () => {
-  const css = document.querySelector("style#glisse-styles")!.textContent!;
+  const css = document.querySelector("style#liquidglass-styles")!.textContent!;
   expect(css).toMatch(/\.lg-slider input::-webkit-slider-thumb\s*\{[^}]*touch-action:\s*none/);
 });

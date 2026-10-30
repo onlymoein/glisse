@@ -14,7 +14,7 @@ const place = (x: number, y: number) =>
   vi
     .spyOn(Element.prototype, "getBoundingClientRect")
     .mockImplementation(function (this: Element) {
-      return this.hasAttribute("data-glisse-backdrop") ? new DOMRect(x, y, 100, 100) : new DOMRect(0, 0, 100, 100);
+      return this.hasAttribute("data-liquidglass-backdrop") ? new DOMRect(x, y, 100, 100) : new DOMRect(0, 0, 100, 100);
     });
 const safari = "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15";
 const chrome = "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
@@ -30,7 +30,7 @@ test("refracts a copy of the marked backdrop where the live one can't be filtere
   place(20, 20);
   render(
     <div>
-      <p data-glisse-backdrop id="wallpaper">
+      <p data-liquidglass-backdrop id="wallpaper">
         Behind
       </p>
       <Glass data-testid="glass">On top</Glass>
@@ -44,7 +44,7 @@ test("refracts a copy of the marked backdrop where the live one can't be filtere
     expect(copy?.textContent).toBe("Behind");
     expect(copy?.getAttribute("aria-hidden")).toBe("true");
     expect(copy?.hasAttribute("inert")).toBe(true);
-    expect(copy?.querySelector("[id], [data-glisse-backdrop]")).toBeNull();
+    expect(copy?.querySelector("[id], [data-liquidglass-backdrop]")).toBeNull();
   }
   expect(screen.getByText("On top")).toBeTruthy();
 });
@@ -57,7 +57,7 @@ test("restyles the copy when a theme set further up changes", async () => {
   document.head.append(style);
   const { container } = render(
     <div data-theme="light">
-      <div data-glisse-backdrop>
+      <div data-liquidglass-backdrop>
         <span className="label">Behind</span>
       </div>
       <Glass data-testid="glass" />
@@ -77,11 +77,11 @@ test("copies the marked backdrop again when its content changes", async () => {
   place(20, 20);
   render(
     <div>
-      <p data-glisse-backdrop>Before</p>
+      <p data-liquidglass-backdrop>Before</p>
       <Glass data-testid="glass" />
     </div>,
   );
-  document.querySelector("[data-glisse-backdrop]")!.textContent = "After";
+  document.querySelector("[data-liquidglass-backdrop]")!.textContent = "After";
   await new Promise((resolve) => setTimeout(resolve, 50));
   expect(screen.getByTestId("glass").previousElementSibling?.textContent).toBe("After");
 });
@@ -91,7 +91,7 @@ test("ignores marked content that isn't behind the glass", () => {
   place(500, 500);
   render(
     <div>
-      <p data-glisse-backdrop>Elsewhere</p>
+      <p data-liquidglass-backdrop>Elsewhere</p>
       <Glass data-testid="glass" />
     </div>,
   );
@@ -101,14 +101,14 @@ test("ignores marked content that isn't behind the glass", () => {
 test("ignores the part of marked content hidden by a scroller", () => {
   browse(safari);
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
-    if (this.hasAttribute("data-glisse-backdrop")) return new DOMRect(0, 0, 1000, 1000);
+    if (this.hasAttribute("data-liquidglass-backdrop")) return new DOMRect(0, 0, 1000, 1000);
     if ((this as HTMLElement).dataset.testid === "scroller") return new DOMRect(0, 0, 100, 100);
     return new DOMRect(0, 400, 100, 40);
   });
   render(
     <div>
       <div data-testid="scroller" style={{ overflow: "auto" }}>
-        <p data-glisse-backdrop>Wallpaper</p>
+        <p data-liquidglass-backdrop>Wallpaper</p>
       </div>
       <Glass data-testid="glass" />
     </div>,
@@ -127,7 +127,7 @@ test("filters the live backdrop in Chromium instead of copying", () => {
   place(20, 20);
   render(
     <div>
-      <p data-glisse-backdrop>Behind</p>
+      <p data-liquidglass-backdrop>Behind</p>
       <Glass data-testid="glass" />
     </div>,
   );

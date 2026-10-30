@@ -1,4 +1,4 @@
-const id = "glisse-styles";
+const id = "liquidglass-styles";
 
 /**
  * Adds the stylesheet to the document once. It goes first in <head>, so the
