@@ -283,7 +283,10 @@ export function Button({
   if (typeof icon === 'string' && !shows) sayNoDrawing(icon);
   // An icon on its own makes a circle, as on iOS. Without a drawing for it, its label's first letter.
   const lone = !text;
-  const height = lone ? circles[size] : heights[size];
+  // A height in its style sizes the glass too, so a button made to line up with its neighbours
+  // stays round, rather than a smaller capsule at the top of the space it was given.
+  const given = StyleSheet.flatten(style)?.height;
+  const height = typeof given === 'number' ? given : lone ? circles[size] : heights[size];
   const fallback = lone && !shows ? (props.accessibilityLabel ?? '').slice(0, 1) : undefined;
   const family = fontFamilyFor(fontFamily);
   // Under a finger the whole button grows and follows it, label and all, as on iOS, rather than
@@ -828,6 +831,9 @@ export function TabBar({
   const holding = useRef(false);
   const anchor = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Counts the tabs a finger has chosen, so the selection is checked against the app's value after
+  // each one, even when the app keeps the value it had.
+  const [picks, setPicks] = useState(0);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const raise = () => {
@@ -847,8 +853,11 @@ export function TabBar({
     const touched = carried.current === index;
     carried.current = null;
     if (touched) return;
+    // Otherwise the app moved the selection, or turned down the tab a finger chose and kept its
+    // own, and the selection goes back to it, as a controlled input does.
+    arriving.current = null;
     spring(base, index * slot, ...SLIDE).start();
-  }, [index, slot]);
+  }, [index, slot, picks]);
 
   useEffect(() => {
     // Going, the selection and badges leave before the bar draws in past them; coming back, they
@@ -902,6 +911,7 @@ export function TabBar({
       const item = items[to];
       carried.current = to === index ? null : to;
       if (!cancelled && item) setCurrent(item.value);
+      setPicks((n) => n + 1);
     },
   });
   const edge = track.edge;
