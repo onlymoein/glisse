@@ -281,8 +281,8 @@ export function painter(): Painter {
   // A lens held under a finger (a thumb, the tab and segment lenses) is lit far more than
   // glass at rest. On iOS 27 it catches the light where its rim faces the top left and again,
   // fainter, where it faces the bottom right; a bright line runs all the way round; and just
-  // inside it the edge splits the light into a thin spectrum, warm on the outside and cool
-  // further in, turning with the rim. Outside, a soft dark hairline keeps it off a white page.
+  // inside it the edge splits the light into a thin band of colour, warm on the outside and
+  // violet further in, where the light catches. Outside, a soft dark hairline keeps it off a white page.
   // Chosen by eye against recordings of the tab bar and sliders, not measured.
   function lensRim(width: number, height: number, radius: number, shine: number, density: number): Paint {
     const result = image(Math.ceil((width + RIM_OUTSET * 2) * density), Math.ceil((height + RIM_OUTSET * 2) * density));
@@ -321,11 +321,13 @@ export function painter(): Painter {
         } else {
           const t = clamp((distance - 0.8) / band, 0, 1);
           if (distance > 0.8 && t < 1) {
-            // Only where the light catches does the edge split it; the colours turn a little
-            // with the rim, as a prism's do when it's turned.
-            const hue = (0.02 + t * 0.62 + facing * 0.08 + 1) % 1;
-            const [cr, cg, cb] = hsl(hue, 1, 0.6);
-            over(cr, cg, cb, Math.sin(Math.PI * t) * (0.02 + 0.5 * spot) * strength);
+            // Only where the light catches does the edge split it, warm on the outside and
+            // rose to violet further in. Never through green: the whole spectrum, from 0.17.0,
+            // laid a green ring round every lens (owner, 2026-11-18: "the liquid glass gets a
+            // shadow of green its very bad").
+            const hue = (0.09 - t * 0.27 + 1) % 1;
+            const [cr, cg, cb] = hsl(hue, 0.75, 0.68);
+            over(cr, cg, cb, Math.sin(Math.PI * t) * 0.32 * spot * strength);
           }
           const line = clamp(1 - distance / 1.3, 0, 1) * (0.4 + 0.55 * glint);
           const glow = Math.exp(-(((distance - 1.6) / (band * 0.4)) ** 2)) * 0.6 * spot;
