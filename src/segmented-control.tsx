@@ -13,7 +13,7 @@ import {
 
 import { useControllable } from "./internal/controllable";
 import { cx } from "./internal/cx";
-import { createJelly, FLAT, glint } from "./internal/jelly";
+import { createJelly, FLAT } from "./internal/jelly";
 import { useRefraction } from "./internal/refraction";
 import { pillPath, roundAtScale } from "./internal/pill";
 import { createSpring, DROP, LIFT, type Spring } from "./internal/spring";
@@ -48,8 +48,6 @@ const FLIGHT = 300;
 // How long a controlled owner has to take up a choice (a router navigating, say) before the
 // thumb goes back to the one it still has.
 const PATIENCE = 2500;
-// Held, the lens enlarges the labels it's over, each about its own centre, as the tab bar's does.
-const ZOOM = 0.16;
 
 interface Face {
   face: HTMLElement;
@@ -96,9 +94,10 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
       let cut = false;
       const span = () => root.getBoundingClientRect().width / Math.max(latest.current.items.length, 1);
 
-      // The lens carries its own copy of the labels, enlarged, over the real ones, which are cut
-      // away under it so they don't show twice. Only the faces are cut: a segment under the
-      // lens still takes a touch. Copied each time it lifts, so it's the labels as they are.
+      // The lens carries its own copy of the labels over the real ones, which are cut away under
+      // it so they don't show twice. As on iOS they keep their size and take the chosen label's
+      // weight. Only the faces are cut: a segment under the lens still takes a touch. Copied each
+      // time it lifts, so it's the labels as they are.
       const row = document.createElement("span");
       row.className = "lg-segmented-row";
       lens.append(row);
@@ -106,6 +105,8 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
       let box = { left: 0, top: 0, width: 0, height: 0 };
       const copy = () => {
         box = { left: lens.offsetLeft, top: lens.offsetTop, width: lens.offsetWidth, height: lens.offsetHeight };
+        const chosen = root.querySelector<HTMLElement>('.lg-segment[aria-checked="true"] .lg-segment-face');
+        const weight = chosen ? getComputedStyle(chosen).fontWeight : undefined;
         faces = [...root.querySelectorAll<HTMLElement>(".lg-segment-face")].map((face) => {
           const segment = face.parentElement!;
           const style = getComputedStyle(face);
@@ -125,7 +126,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
             fontFamily: style.fontFamily,
             fontSize: style.fontSize,
             fontStyle: style.fontStyle,
-            fontWeight: style.fontWeight,
+            fontWeight: weight ?? style.fontWeight,
             lineHeight: style.lineHeight,
             textAlign: style.textAlign,
             letterSpacing: style.letterSpacing,
@@ -154,8 +155,6 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
         lens.style.opacity = String(Math.min(1, shown * 4));
         lens.style.visibility = shown > 0.001 ? "visible" : "hidden";
         lens.style.setProperty("--lg-lift", String(shown));
-        const zoom = String(1 + ZOOM * shown);
-        for (const item of faces) item.copy.style.scale = zoom;
         // Out of sight there's nothing to trail, so the lens starts afresh each time it's lifted.
         jelly.follow(at * segment, shown < 0.01);
         place();
@@ -198,7 +197,6 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
         () => lens.offsetWidth,
         (shape) => {
           squashed = shape;
-          lens.style.setProperty("--lg-glint", glint(shape.shift));
           place();
         },
         // Dragged straight to the finger, so the body trails it as the slider's does.

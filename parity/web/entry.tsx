@@ -20,6 +20,7 @@ function Element() {
     case "filled-large": return <Button variant="filled" size="large">Continue</Button>;
     case "switch": return <Switch aria-label="On" checked={on} onCheckedChange={setOn} />;
     case "slider": return <div style={{ width: w }}><Slider aria-label="Value" defaultValue={50} min={0} max={100} /></div>;
+    case "segmented": return <SegmentedControl aria-label="Kind" style={{ width: w }} items={[{ value: "b", label: "Boxes" }, { value: "p", label: "Pallets" }, { value: "s", label: "Skids" }]} />;
     default: return null;
   }
 }

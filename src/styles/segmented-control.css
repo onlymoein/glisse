@@ -34,12 +34,10 @@
   border-radius: 22px;
   visibility: hidden;
   pointer-events: none;
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / calc(0.3 * var(--lg-lift, 0))),
-    0 4px 14px rgb(0 0 0 / calc(0.16 * var(--lg-lift, 0)));
+  box-shadow: 0 6px 16px rgb(0 0 0 / calc(0.08 * var(--lg-lift, 0)));
 }
 
-/* Its copy of the labels, put back where they are and enlarged, under its rim and sheen. */
+/* Its copy of the labels, put back where they are, under its rim. */
 .lg-segmented-row {
   position: absolute;
   top: 0;

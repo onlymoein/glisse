@@ -1,6 +1,7 @@
 // What a held tab lens shows bends at its rim, as iOS 27's does: near the rim
-// it draws what lies further in, so labels stretch out to the edge, and on a
-// dark page the colours part, red furthest out.
+// it draws what lies further in, so labels stretch out to the edge. The colours
+// don't part, in light or dark: on iOS a held tab's label stays solid, and split
+// rays left a dark fringe round it over anything but black.
 //
 // The filter goes on the lens's own copy of the labels rather than on the
 // backdrop, so it works in every browser, Safari included. It's fixed to the
@@ -20,8 +21,6 @@ const SVG = "http://www.w3.org/2000/svg";
 export const BEND_REACH = 7;
 /** How wide the band round the rim that bends is, in px. */
 export const BEND_BAND = 15;
-/** How much further red bends than green, and blue less, as a share of the bend. */
-export const BEND_SPLIT = 0.14;
 /** How far, in px, what the rim bends is softened, as iOS softens it. */
 export const BEND_BLUR = 0.9;
 /** The bend grows with the lift in this many steps. Each is a filter of its own. */
@@ -50,8 +49,7 @@ function container(): SVGDefsElement {
 }
 
 /** The key a tab bar's lens of this size is held by in `bends`. */
-export const bendKey = (width: number, height: number, dark: boolean): string =>
-  `${Math.round(width * 2) / 2}x${Math.round(height * 2) / 2}${dark ? "-dark" : ""}`;
+export const bendKey = (width: number, height: number): string => `${Math.round(width * 2) / 2}x${Math.round(height * 2) / 2}`;
 
 /** The bend filters in use: a tab bar holds its lens's size, and drops it when the lens changes size or goes. */
 export const bends: Pool = pool(4, (key) => {
@@ -70,10 +68,10 @@ const boxUnits = (): boolean => /AppleWebKit\//.test(navigator.userAgent) && !/C
  * Filters that bend the rim of a capsule `width` by `height`, from barely to
  * fully, one for each step of the lift. Index 0 is the first step, not none.
  */
-export function bendFilters(width: number, height: number, dark: boolean, ready?: (filters: string[]) => void): string[] {
+export function bendFilters(width: number, height: number, ready?: (filters: string[]) => void): string[] {
   const w = Math.round(width * 2) / 2;
   const h = Math.round(height * 2) / 2;
-  const key = bendKey(width, height, dark);
+  const key = bendKey(width, height);
   const cached = filters.get(key);
   if (cached) return cached;
 
@@ -81,21 +79,12 @@ export function bendFilters(width: number, height: number, dark: boolean, ready?
   // the lens don't bend.
   const density = Math.min(devicePixelRatio || 1, 2);
   const maps = `bend-${w}x${h}-${density}`;
-  const drawn = painted(maps, { kind: "bend", args: [w, h, density] }, () => ready?.(bendFilters(width, height, dark)));
+  const drawn = painted(maps, { kind: "bend", args: [w, h, density] }, () => ready?.(bendFilters(width, height, ready)));
   if (!drawn) return [];
   const [across, down, band] = drawn.urls as [string, string, string];
   const result: string[] = [];
   const base = `liquidglass-bend-${madeIds++}`;
   const elements: SVGElement[] = [];
-  // On a light page labels are dark ink, which has no colour to part: it only blurs.
-  const rays = dark
-    ? ([
-        ["r", 1 + BEND_SPLIT, "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"],
-        ["g", 1, "0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0"],
-        ["b", 1 - BEND_SPLIT, "0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0"],
-      ] as const)
-    : ([["all", 1, ""]] as const);
-
   const box = boxUnits();
   const unit = box ? "objectBoundingBox" : "userSpaceOnUse";
   const place = box ? { x: 0, y: 0, width: 1, height: 1 } : { x: 0, y: 0, width: w, height: h };
@@ -121,35 +110,24 @@ export function bendFilters(width: number, height: number, dark: boolean, ready?
       filter.append(half);
     }
     const reach = (BEND_REACH * 2 * step) / BEND_STEPS;
-    for (const [name, factor, values] of rays) {
-      filter.append(
-        svg("feDisplacementMap", {
-          in: "SourceGraphic",
-          in2: "across",
-          scale: box ? (reach * factor) / w : reach * factor,
-          xChannelSelector: "R",
-          yChannelSelector: "A",
-          result: `${name}-x`,
-        }),
-        svg("feDisplacementMap", {
-          in: `${name}-x`,
-          in2: "down",
-          scale: box ? (reach * factor) / h : reach * factor,
-          xChannelSelector: "A",
-          yChannelSelector: "R",
-          result: values ? `${name}-ray` : "bent",
-        }),
-      );
-      if (values) filter.append(svg("feColorMatrix", { in: `${name}-ray`, type: "matrix", values, result: name }));
-    }
-    if (dark) {
-      // Each colour from its own ray. Over black, which a dark page is taken to be, adding
-      // them gives exactly the labels as the split light would draw them.
-      filter.append(
-        svg("feComposite", { in: "r", in2: "g", operator: "arithmetic", k2: 1, k3: 1, result: "rg" }),
-        svg("feComposite", { in: "rg", in2: "b", operator: "arithmetic", k2: 1, k3: 1, result: "bent" }),
-      );
-    }
+    filter.append(
+      svg("feDisplacementMap", {
+        in: "SourceGraphic",
+        in2: "across",
+        scale: box ? reach / w : reach,
+        xChannelSelector: "R",
+        yChannelSelector: "A",
+        result: "bent-x",
+      }),
+      svg("feDisplacementMap", {
+        in: "bent-x",
+        in2: "down",
+        scale: box ? reach / h : reach,
+        xChannelSelector: "A",
+        yChannelSelector: "R",
+        result: "bent",
+      }),
+    );
     // Softened where it bends, and as sharp as ever where it doesn't. The displacement
     // samples the nearest pixel, which leaves stair-steps the blur also smooths.
     const blur = BEND_BLUR * (step / BEND_STEPS);

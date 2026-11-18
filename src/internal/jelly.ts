@@ -31,10 +31,6 @@ export interface Squash {
 
 export const FLAT: Squash = { x: 1, y: 1, shift: 0 };
 
-/** How far a held lens's sheen has drifted against its motion, -1 to 1, from how far its body
- *  trails: as a CSS value for `--lg-glint`. */
-export const glint = (shift: number): string => String(Math.max(-1, Math.min(1, shift / 12)));
-
 /** The shape of a lens `length` long that trails its place by `lag` px, as far as `trail` of it shows. */
 export function squash(lag: number, length: number, trail = 0): Squash {
   if (!lag || length <= 0) return FLAT;

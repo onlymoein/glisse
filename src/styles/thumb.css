@@ -1,7 +1,8 @@
 /* Switch and slider thumbs */
 
 /* Under a finger a thumb is a clear lens: sharp, neither blurred nor lifted, with a
-   dark outline. At rest its white face covers that, and the rim and shadow go. */
+   dark hairline and a faint shadow. At rest its white face covers that, and the rim and
+   shadow go. */
 .lg-switch-thumb,
 .lg-slider-thumb {
   --lg-transparency: 1;
@@ -12,9 +13,7 @@
   position: absolute;
   border-radius: 999px;
   pointer-events: none;
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / calc(0.3 * var(--lg-lift, 0))),
-    0 4px 14px rgb(0 0 0 / calc(0.16 * var(--lg-lift, 0)));
+  box-shadow: 0 6px 16px rgb(0 0 0 / calc(0.08 * var(--lg-lift, 0)));
 }
 
 /* Held, a thumb is a lens, as the tab bar's is: its rim bends what's behind it, and its edge
@@ -29,9 +28,7 @@
 }
 
 .lg-slider-thumb {
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / calc(0.3 * var(--lg-lift, 0))),
-    0 4px 14px rgb(0 0 0 / 0.14);
+  box-shadow: 0 6px 16px rgb(0 0 0 / calc(0.06 + 0.02 * var(--lg-lift, 0)));
 }
 
 .lg-thumb-face {
@@ -41,18 +38,10 @@
   background: #fff;
 }
 
-/* A held lens carries a soft sheen up by its lit corner, which drifts against the way it's
-   moving and comes back when it stops, so the light seems to sit on the glass rather than be
-   printed on it. */
+/* Nothing lies over a held lens: iOS's is as clear in the middle as what's behind it, so
+   neither a press's lightening nor a sheen. */
 .lg-switch-thumb::after,
 .lg-slider-thumb::after,
 .lg-segmented-lens::after {
-  background: radial-gradient(
-    ellipse 62% 48% at calc(34% - 16% * var(--lg-glint, 0)) 20%,
-    rgb(255 255 255 / 0.34),
-    rgb(255 255 255 / 0.1) 55%,
-    transparent 75%
-  );
-  opacity: var(--lg-lift, 0);
-  transition: none;
+  content: none;
 }

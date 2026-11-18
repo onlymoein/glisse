@@ -239,12 +239,13 @@
     background-color 140ms ease;
 }
 
+/* Held, it lightens the bar under it a little, about 8% on iOS, rather than deepening it. */
 .lg-tab-bar[data-lifted] .lg-tab-lens.lg-glass {
   background-color: var(--lg-lens);
   background-image: var(--lg-rim, none);
   background-size: 100% 100%;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  -webkit-backdrop-filter: brightness(1.08);
+  backdrop-filter: brightness(1.08);
   transition-duration: 100ms;
 }
 
@@ -269,8 +270,8 @@
 .lg-tab-bar[data-refracting] .lg-tab-lens.lg-glass {
   background-image: var(--lg-rim, none);
   background-size: 100% 100%;
-  -webkit-backdrop-filter: var(--lg-filter, none);
-  backdrop-filter: var(--lg-filter, none);
+  -webkit-backdrop-filter: var(--lg-filter,) brightness(1.08);
+  backdrop-filter: var(--lg-filter,) brightness(1.08);
 }
 
 .lg-tab-bar[data-hidden] :is(.lg-tab-lens, .lg-tab-tint),

@@ -11,7 +11,7 @@ import {
 
 import { useControllable } from "./internal/controllable";
 import { cx } from "./internal/cx";
-import { createJelly, glint, type Jelly } from "./internal/jelly";
+import { createJelly, type Jelly } from "./internal/jelly";
 import { useRefraction } from "./internal/refraction";
 import { createSpring, DROP, LIFT } from "./internal/spring";
 import { useStyles } from "./internal/styles";
@@ -88,7 +88,6 @@ export const Slider: ForwardRefExoticComponent<SliderProps & RefAttributes<HTMLI
           // The fill ends under the thumb's middle as it's drawn, trailing the finger with it,
           // not where the value alone would put it.
           root.style.setProperty("--lg-shift", `${shape.shift}px`);
-          thumb.style.setProperty("--lg-glint", glint(shape.shift));
         },
         // The thumb is set straight to the finger's place, so it shows the lag itself.
         0.35,

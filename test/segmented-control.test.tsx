@@ -92,7 +92,7 @@ test("a drag only starts from the thumb, and a cancelled one chooses nothing", (
   expect(onValueChange).not.toHaveBeenCalled();
 });
 
-test("held, the lens carries an enlarged copy of the labels and cuts away the ones under it", async () => {
+test("held, the lens carries a copy of the labels at their own size and cuts away the ones under it", async () => {
   vi.useFakeTimers();
   render(<SegmentedControl aria-label="Kind" items={items} />);
   const group = screen.getByRole("radiogroup", { name: "Kind" });
@@ -108,7 +108,7 @@ test("held, the lens carries an enlarged copy of the labels and cuts away the on
   await act(() => vi.advanceTimersByTimeAsync(200));
   const copies = [...lens.querySelectorAll<HTMLElement>(".lg-segmented-copy")];
   expect(copies.map((copy) => copy.textContent)).toEqual(["Boxes", "Pallets", "Skids"]);
-  expect(Number(copies[0]!.style.scale)).toBeGreaterThan(1);
+  expect(copies.every((copy) => !copy.style.scale)).toBe(true);
   expect(lens.querySelector(".lg-segmented-row")!.closest("[aria-hidden]")).toBe(lens);
   // The real labels keep their names, so the copies are only something to see.
   expect(screen.getAllByRole("radio")).toHaveLength(3);

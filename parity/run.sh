@@ -2,7 +2,7 @@
 # build | start | stop | shot <engine> <light|dark> <out.png> [-arg value ...]
 set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"; B="$HERE/.build"; ID=local.liquidglass.parity
-D=$(xcrun simctl list devices available | grep -E "^\s+iPhone 17 \(" | head -1 | grep -oE "[0-9A-F-]{36}")
+D=${SIM:-$(xcrun simctl list devices available | sed -n "/-- iOS 27/,\$p" | grep -E "^\s+iPhone 17 \(" | head -1 | grep -oE "[0-9A-F-]{36}")}
 case "$1" in
 build)
   mkdir -p "$B/Parity.app" "$B/web"

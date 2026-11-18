@@ -100,16 +100,15 @@ function attach({ bar, glass, lens, tint, bend, row }: Parts, select: (index: nu
     growX = parseFloat(style.getPropertyValue("--lg-lens-grow-x")) || 0;
     growY = parseFloat(style.getPropertyValue("--lg-lens-grow-y")) || 0;
     // The lens's copy of the labels bends at its rim. Made before the first lift, so it's ready.
-    const dark = style.getPropertyValue("--lg-dark").trim() !== "" && style.getPropertyValue("--lg-dark").trim() !== "initial";
     if (tint.offsetWidth && tint.offsetHeight) {
       // Held for as long as the lens is this size, so it's let go of once it isn't.
-      const key = bendKey(tint.offsetWidth, tint.offsetHeight, dark);
+      const key = bendKey(tint.offsetWidth, tint.offsetHeight);
       if (key !== heldBend) {
         bendPool.hold(key);
         if (heldBend) bendPool.drop(heldBend);
         heldBend = key;
       }
-      bends = bendFilters(tint.offsetWidth, tint.offsetHeight, dark, (ready) => {
+      bends = bendFilters(tint.offsetWidth, tint.offsetHeight, (ready) => {
         bends = ready;
       });
     }

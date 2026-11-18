@@ -161,6 +161,7 @@ struct Native: View {
   @State var on = true
   @State var value = 0.5
   @State var tab = 0
+  @State var pick = 0
   var body: some View {
     if ["controls", "menu", "context", "sheet", "alert", "dialog", "show-sheet", "show-alert"].contains(argument("scene", "panel")) {
       Gallery()
@@ -211,6 +212,7 @@ struct Native: View {
     case "filled-large": Button("Continue") {}.buttonStyle(.glassProminent).controlSize(.large)
     case "switch": Toggle("", isOn: $on).labelsHidden()
     case "slider": Slider(value: $value).frame(width: w)
+    case "segmented": Picker("", selection: $pick) { Text("Boxes").tag(0); Text("Pallets").tag(1); Text("Skids").tag(2) }.pickerStyle(.segmented).frame(width: w)
     default: EmptyView()
     }
   }
