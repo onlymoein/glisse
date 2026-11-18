@@ -27,7 +27,7 @@ test("stretches along the drag and thins across it, by more the further it trail
 
 test("stretches the same either way, and stops short of tearing", () => {
   expect(squash(-40, 60).x).toBeCloseTo(squash(40, 60).x);
-  expect(squash(1e6, 60).x).toBeLessThanOrEqual(1.3 + 1e-9);
+  expect(squash(1e6, 60).x).toBeLessThanOrEqual(1.18 + 1e-9);
   expect(squash(1e6, 60).y).toBeGreaterThan(0.8);
 });
 

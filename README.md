@@ -305,6 +305,7 @@ Add the class `lg-grow` to a popup from Radix, Base UI or similar. It then grows
 | --- | --- |
 | `--lg-fill` | The accent colour of filled buttons and sliders |
 | `--lg-on` | A switch that's on |
+| `--lg-segmented-lens-color` | The labels a held segmented control's lens carries; each keeps its own colour otherwise |
 | `--lg-glass-tinted` | The tint when `--lg-transparency` is below `0.5` |
 | `--lg-shine` | How strong the rim's lines are; `1` matches iOS 27 |
 | `--lg-contrast`, `--lg-brightness`, `--lg-saturate` | What glass does to what's behind it (add `-small` for glass 60 points tall or less) |

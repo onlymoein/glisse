@@ -14,6 +14,7 @@ import { createJelly, FLAT, type Squash } from "./internal/jelly";
 import { useControllable } from "./internal/controllable";
 import { cx } from "./internal/cx";
 import { held } from "./internal/hold";
+import { pillPath, roundAtScale } from "./internal/pill";
 import { safeHref } from "./internal/href";
 import { useRefraction } from "./internal/refraction";
 import { createSpring, prefersReducedMotion } from "./internal/spring";
@@ -116,24 +117,19 @@ function attach({ bar, glass, lens, tint, bend, row }: Parts, select: (index: nu
 
   // The selection shows its own copy of the tabs, so the ones under it are cut away along
   // its edge. Only the faces: a tab under the lens still has to take a touch.
-  const cutOut = (x: number, sx: number, sy: number) => {
+  const cutOut = (x: number, sx: number, sy: number, radius: number) => {
     const width = lensWidth * sx;
     const tall = height * sy;
     const left = edge + x + slot / 2 - width / 2;
     const up = top + height / 2 - tall / 2;
-    const rx = Math.min((height / 2) * sx, width / 2);
-    const ry = tall / 2;
     faces.forEach((face, index) => {
       const from = edge + index * slot;
       if ("hidden" in bar.dataset || left + width <= from || left >= from + slot) {
         face.style.clipPath = "";
         return;
       }
-      const [l, r] = [left - from, left - from + width];
-      const [t, b] = [up - top, up - top + tall];
-      const n = (value: number) => value.toFixed(2);
-      const hole = `M${n(l + rx)} ${n(t)}H${n(r - rx)}A${n(rx)} ${n(ry)} 0 0 1 ${n(r)} ${n((t + b) / 2)}A${n(rx)} ${n(ry)} 0 0 1 ${n(r - rx)} ${n(b)}H${n(l + rx)}A${n(rx)} ${n(ry)} 0 0 1 ${n(l)} ${n((t + b) / 2)}A${n(rx)} ${n(ry)} 0 0 1 ${n(l + rx)} ${n(t)}Z`;
-      face.style.clipPath = `path(evenodd, "M-200 -200H${n(slot + 200)}V${n(height + 200)}H-200Z${hole}")`;
+      const hole = pillPath(left - from, up - top, width, tall, radius);
+      face.style.clipPath = `path(evenodd, "M-200 -200H${(slot + 200).toFixed(2)}V${(height + 200).toFixed(2)}H-200Z${hole}")`;
     });
   };
 
@@ -143,6 +139,8 @@ function attach({ bar, glass, lens, tint, bend, row }: Parts, select: (index: nu
     const sx = (1 + (growX / slot) * lift) * squashed.x;
     const sy = (1 + (growY / height) * lift) * squashed.y;
     lens.style.transform = tint.style.transform = `translateX(${x}px) scale(${sx}, ${sy})`;
+    const round = roundAtScale(lensWidth, height, height / 2, sx, sy);
+    lens.style.borderRadius = tint.style.borderRadius = round.css;
     // Everything in the lens is enlarged as it lifts, each tab about its own centre, and
     // they draw in a little towards the lens's. Measured on iOS.
     const pull = 1 - PULL * lift;
@@ -155,7 +153,7 @@ function attach({ bar, glass, lens, tint, bend, row }: Parts, select: (index: nu
     const step = Math.round(lift * BEND_STEPS);
     bend.style.filter = step > 0 ? (bends[Math.min(step, bends.length) - 1] ?? "") : "";
     bar.style.scale = lift > 0.001 ? String(1 + BAR_GROW * lift) : "";
-    cutOut(x, sx, sy);
+    cutOut(x, sx, sy, round.drawn);
     if (!gesture && lift < 0.01) delete bar.dataset.refracting;
   };
 

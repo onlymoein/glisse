@@ -119,7 +119,7 @@ Placement rules that matter:
 - `--lg-transparency`, set anywhere above the glass: `0` fully tinted, `0.5` regular (default),
   `1` clear. Reduced transparency and increased contrast settings make glass fully tinted.
 - Colours to override in your CSS: `--lg-fill` (accent of filled buttons and sliders), `--lg-on`
-  (switch on), `--lg-glass-tinted` (the tint below 0.5), `--lg-shine` (rim strength, 1 = iOS),
+  (switch on), `--lg-segmented-lens-color` (labels in a held segmented lens), `--lg-glass-tinted` (the tint below 0.5), `--lg-shine` (rim strength, 1 = iOS),
   and `--lg-contrast`/`--lg-brightness`/`--lg-saturate` (with `-small` variants for glass 60 pt or
   less). The last group is what the glass does to its backdrop.
 - Lens shape on a single piece of glass: `--lg-bezel` (px of edge that bends), `--lg-thickness`

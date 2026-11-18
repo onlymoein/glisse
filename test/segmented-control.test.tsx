@@ -91,3 +91,31 @@ test("a drag only starts from the thumb, and a cancelled one chooses nothing", (
   press(window as unknown as Element, "pointercancel", 280);
   expect(onValueChange).not.toHaveBeenCalled();
 });
+
+test("held, the lens carries an enlarged copy of the labels and cuts away the ones under it", async () => {
+  vi.useFakeTimers();
+  render(<SegmentedControl aria-label="Kind" items={items} />);
+  const group = screen.getByRole("radiogroup", { name: "Kind" });
+  wide(group);
+  const lens = group.querySelector<HTMLElement>(".lg-segmented-lens")!;
+  // jsdom lays nothing out: three faces of 100 by 28, a lens of 120 by 44.
+  const size = (element: Element, box: Record<string, number>) =>
+    Object.entries(box).forEach(([key, value]) => Object.defineProperty(element, key, { value, configurable: true }));
+  group.querySelectorAll(".lg-segment").forEach((segment, i) => size(segment, { offsetLeft: i * 100, offsetTop: 0 }));
+  group.querySelectorAll(".lg-segment-face").forEach((face) => size(face, { offsetLeft: 0, offsetTop: 2, offsetWidth: 100, offsetHeight: 28 }));
+  size(lens, { offsetLeft: -10, offsetTop: 16, offsetWidth: 120, offsetHeight: 44 });
+  press(screen.getByRole("radio", { name: "Boxes" }), "pointerdown", 50);
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  const copies = [...lens.querySelectorAll<HTMLElement>(".lg-segmented-copy")];
+  expect(copies.map((copy) => copy.textContent)).toEqual(["Boxes", "Pallets", "Skids"]);
+  expect(Number(copies[0]!.style.scale)).toBeGreaterThan(1);
+  expect(lens.querySelector(".lg-segmented-row")!.closest("[aria-hidden]")).toBe(lens);
+  // The real labels keep their names, so the copies are only something to see.
+  expect(screen.getAllByRole("radio")).toHaveLength(3);
+  expect(group.querySelector<HTMLElement>(".lg-segment-face")!.style.clipPath).toContain("evenodd");
+  press(window as unknown as Element, "pointerup", 50);
+  await act(() => vi.runAllTimersAsync());
+  expect(lens.style.visibility).toBe("hidden");
+  expect(group.querySelector<HTMLElement>(".lg-segment-face")!.style.clipPath).toBe("");
+  vi.useRealTimers();
+});

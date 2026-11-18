@@ -11,8 +11,10 @@ import { createSpring } from "./spring";
 // Swings back about a fifth of the way past, once: 650 / 24 is a damping ratio of 0.47.
 const STIFFNESS = 650;
 const DAMPING = 24;
-/** The most a lens stretches along its drag, as a share of its length. */
-const STRETCH = 0.3;
+/** The most a lens stretches along its drag, as a share of its length. It had been 0.3, and a
+ *  quick drag pulled a tab bar's lens out across two tabs (owner, 2026-11-18: "it gets
+ *  stretched somehow"). */
+const STRETCH = 0.18;
 /** How far behind it has to trail, in lengths, to be most of the way there. */
 const REACH = 1.2;
 /** How much it thins across for what it stretches along. */
