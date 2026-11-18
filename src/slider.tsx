@@ -11,9 +11,9 @@ import {
 
 import { useControllable } from "./internal/controllable";
 import { cx } from "./internal/cx";
-import { createJelly, type Jelly } from "./internal/jelly";
+import { createJelly, glint, type Jelly } from "./internal/jelly";
 import { useRefraction } from "./internal/refraction";
-import { createSpring } from "./internal/spring";
+import { createSpring, DROP, LIFT } from "./internal/spring";
 import { useStyles } from "./internal/styles";
 import thumbCss from "./styles/thumb.css?inline";
 import sliderCss from "./styles/slider.css?inline";
@@ -66,7 +66,7 @@ export const Slider: ForwardRefExoticComponent<SliderProps & RefAttributes<HTMLI
     const input = inputRef.current!;
     const thumb = thumbRef.current!;
     const face = faceRef.current!;
-    const lift = createSpring(0, 2000, 80, (amount) => {
+    const lift = createSpring(0, ...LIFT, (amount) => {
       const shown = Math.min(1, Math.max(0, amount));
       thumb.style.scale = String(0.627 + 0.373 * amount);
       face.style.opacity = String(1 - shown);
@@ -85,6 +85,10 @@ export const Slider: ForwardRefExoticComponent<SliderProps & RefAttributes<HTMLI
         () => thumb.offsetWidth,
         (shape) => {
           thumb.style.transform = shape.x === 1 && shape.y === 1 && !shape.shift ? "" : `translateX(${shape.shift}px) scale(${shape.x}, ${shape.y})`;
+          // The fill ends under the thumb's middle as it's drawn, trailing the finger with it,
+          // not where the value alone would put it.
+          root.style.setProperty("--lg-shift", `${shape.shift}px`);
+          thumb.style.setProperty("--lg-glint", glint(shape.shift));
         },
         // The thumb is set straight to the finger's place, so it shows the lag itself.
         0.35,
@@ -99,7 +103,7 @@ export const Slider: ForwardRefExoticComponent<SliderProps & RefAttributes<HTMLI
       if (input.disabled) return;
       clearTimeout(linger);
       heldAt = performance.now();
-      lift.tune(2000, 80);
+      lift.tune(...LIFT);
       lift.set(1);
       trail.held = true;
       trail.jelly.follow(trail.place(), true);
@@ -107,7 +111,7 @@ export const Slider: ForwardRefExoticComponent<SliderProps & RefAttributes<HTMLI
     const release = () => {
       clearTimeout(linger);
       linger = window.setTimeout(() => {
-        lift.tune(600, 49);
+        lift.tune(...DROP);
         lift.set(0);
         trail.held = false;
       }, Math.max(0, 240 - (performance.now() - heldAt)));
@@ -158,6 +162,7 @@ export const Slider: ForwardRefExoticComponent<SliderProps & RefAttributes<HTMLI
       trail.jelly.stop();
       jelly.current = null;
       thumb.style.transform = "";
+      root.style.removeProperty("--lg-shift");
       input.removeEventListener("pointerdown", hold);
       ends.forEach((type) => input.removeEventListener(type, release));
       window.removeEventListener("pointerup", release);

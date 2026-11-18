@@ -13,9 +13,9 @@ import {
 
 import { useControllable } from "./internal/controllable";
 import { cx } from "./internal/cx";
-import { createJelly, FLAT } from "./internal/jelly";
+import { createJelly, FLAT, glint } from "./internal/jelly";
 import { useRefraction } from "./internal/refraction";
-import { createSpring, type Spring } from "./internal/spring";
+import { createSpring, DROP, LIFT, type Spring } from "./internal/spring";
 import { useStyles } from "./internal/styles";
 import thumbCss from "./styles/thumb.css?inline";
 import segmentedControlCss from "./styles/segmented-control.css?inline";
@@ -107,6 +107,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
         () => lens.offsetWidth,
         (shape) => {
           squashed = shape;
+          lens.style.setProperty("--lg-glint", glint(shape.shift));
           place();
         },
         // Dragged straight to the finger, so the body trails it as the slider's does.
@@ -116,7 +117,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
         at = next;
         draw();
       });
-      const lift = createSpring(0, 2000, 80, (next) => {
+      const lift = createSpring(0, ...LIFT, (next) => {
         amount = next;
         draw();
       });
@@ -128,23 +129,23 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
       const hold = () => {
         clearTimeout(linger);
         heldAt = performance.now();
-        lift.tune(2000, 80);
+        lift.tune(...LIFT);
         lift.set(1);
       };
       const release = () => {
         clearTimeout(linger);
         linger = window.setTimeout(() => {
-          lift.tune(600, 49);
+          lift.tune(...DROP);
           lift.set(0);
         }, Math.max(0, LINGER - (performance.now() - heldAt)));
       };
 
       fly.current = () => {
         clearTimeout(linger);
-        lift.tune(2000, 80);
+        lift.tune(...LIFT);
         lift.set(1);
         linger = window.setTimeout(() => {
-          lift.tune(600, 49);
+          lift.tune(...DROP);
           lift.set(0);
         }, FLIGHT);
       };

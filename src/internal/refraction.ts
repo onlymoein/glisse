@@ -253,10 +253,10 @@ function darkCurve(size: number): string {
 }
 
 /** The rim's picture as a CSS image, with the painting it's from, or undefined while it's still being drawn. */
-function rimFor(width: number, height: number, radius: number, shine: number, clear: number, ready: () => void): [string, string] | undefined {
+function rimFor(width: number, height: number, radius: number, shine: number, clear: number, ready: () => void, lens = false): [string, string] | undefined {
   const density = Math.min(devicePixelRatio || 1, 3);
-  const key = `rim-${width}-${height}-${radius}-${shine}-${clear}-${density}`;
-  const rim = painted(key, { kind: "rim", args: [width, height, radius, shine, clear, density] }, ready);
+  const key = `rim-${width}-${height}-${radius}-${shine}-${clear}-${density}${lens ? "-lens" : ""}`;
+  const rim = painted(key, { kind: "rim", args: [width, height, radius, shine, clear, density, lens] }, ready);
   return rim ? [`url("${rim.urls[0]}")`, key] : rim === null ? ["none", key] : undefined;
 }
 
@@ -381,7 +381,8 @@ function fit(element: HTMLElement, selection: boolean, filtered: boolean): void 
   }
   // A selection's lens stretches as it lifts and draws its rim as a background.
   if (selection) {
-    const rim = rimFor(width, height, radius, shape.shine, clear, again);
+    // A selection is a lens, lit as one.
+    const rim = rimFor(width, height, radius, shape.shine, clear, again, true);
     if (rim !== undefined) {
       element.style.setProperty("--lg-rim", rim[0]);
       use(element, "rim", [paintings, rim[1]]);

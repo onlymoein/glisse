@@ -30,7 +30,7 @@ export interface Painter {
     density: number,
   ): Paint;
   mask(width: number, height: number, radius: number, density: number): Paint;
-  rim(width: number, height: number, radius: number, shine: number, clear: number, density: number): Paint;
+  rim(width: number, height: number, radius: number, shine: number, clear: number, density: number, lens?: boolean): Paint;
   bend(width: number, height: number, density: number): Paint;
   continuous(width: number, height: number, radius: number): boolean;
   CORNER_REACH: number;
@@ -237,7 +237,8 @@ export function painter(): Painter {
   // iOS 27 lights glass from straight above and below: a bright line along the top
   // and bottom, a dark hairline just outside the sides and more faintly round the
   // rest, and a faint shade inside everywhere but the bottom. Measured in parity/.
-  function rim(width: number, height: number, radius: number, shine: number, clear: number, density: number): Paint {
+  function rim(width: number, height: number, radius: number, shine: number, clear: number, density: number, lens = false): Paint {
+    if (lens) return lensRim(width, height, radius, shine, density);
     const result = image(Math.ceil((width + RIM_OUTSET * 2) * density), Math.ceil((height + RIM_OUTSET * 2) * density));
     for (let y = 0; y < result.height; y++) {
       for (let x = 0; x < result.width; x++) {
@@ -275,6 +276,77 @@ export function painter(): Painter {
       }
     }
     return { images: [result] };
+  }
+
+  // A lens held under a finger (a thumb, the tab and segment lenses) is lit far more than
+  // glass at rest. On iOS 27 it catches the light where its rim faces the top left and again,
+  // fainter, where it faces the bottom right; a bright line runs all the way round; and just
+  // inside it the edge splits the light into a thin spectrum, warm on the outside and cool
+  // further in, turning with the rim. Outside, a soft dark hairline keeps it off a white page.
+  // Chosen by eye against recordings of the tab bar and sliders, not measured.
+  function lensRim(width: number, height: number, radius: number, shine: number, density: number): Paint {
+    const result = image(Math.ceil((width + RIM_OUTSET * 2) * density), Math.ceil((height + RIM_OUTSET * 2) * density));
+    // Where the light comes from: up and to the left.
+    const lx = -0.6;
+    const ly = -0.8;
+    const band = clamp(Math.min(width, height) * 0.16, 3, 8);
+    const strength = clamp(shine / 0.6, 0.4, 1.6);
+    for (let y = 0; y < result.height; y++) {
+      for (let x = 0; x < result.width; x++) {
+        const px = (x + 0.5) / density - RIM_OUTSET - width / 2;
+        const py = (y + 0.5) / density - RIM_OUTSET - height / 2;
+        const { distance, nx, ny } = toEdge(px, py, width, height, radius);
+        if (distance > band + 2) continue;
+        const facing = nx * lx + ny * ly;
+        // Broad for the white, tight for the spots where the light catches.
+        const glint = Math.max(Math.max(0, facing) ** 2, 0.6 * Math.max(0, -facing) ** 2);
+        const spot = Math.max(Math.max(0, facing) ** 4, 0.65 * Math.max(0, -facing) ** 4);
+
+        // Composited back to front: the shade, the spectrum, then the white.
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let a = 0;
+        const over = (cr: number, cg: number, cb: number, ca: number) => {
+          if (ca <= 0) return;
+          const out = ca + a * (1 - ca);
+          r = (cr * ca + r * a * (1 - ca)) / out;
+          g = (cg * ca + g * a * (1 - ca)) / out;
+          b = (cb * ca + b * a * (1 - ca)) / out;
+          a = out;
+        };
+
+        if (distance < 0) {
+          over(0, 0, 0, clamp(1 + distance / 0.9, 0, 1) * 0.22 * strength);
+        } else {
+          const t = clamp((distance - 0.8) / band, 0, 1);
+          if (distance > 0.8 && t < 1) {
+            // Only where the light catches does the edge split it; the colours turn a little
+            // with the rim, as a prism's do when it's turned.
+            const hue = (0.02 + t * 0.62 + facing * 0.08 + 1) % 1;
+            const [cr, cg, cb] = hsl(hue, 1, 0.6);
+            over(cr, cg, cb, Math.sin(Math.PI * t) * (0.02 + 0.5 * spot) * strength);
+          }
+          const line = clamp(1 - distance / 1.3, 0, 1) * (0.4 + 0.55 * glint);
+          const glow = Math.exp(-(((distance - 1.6) / (band * 0.4)) ** 2)) * 0.6 * spot;
+          over(255, 255, 255, clamp((line + glow - line * glow) * strength, 0, 1));
+        }
+        if (a <= 0) continue;
+        const i = (y * result.width + x) * 4;
+        result.data[i] = Math.round(r);
+        result.data[i + 1] = Math.round(g);
+        result.data[i + 2] = Math.round(b);
+        result.data[i + 3] = Math.round(clamp(a, 0, 1) * 255);
+      }
+    }
+    return { images: [result] };
+  }
+
+  function hsl(h: number, s: number, l: number): [number, number, number] {
+    const k = (n: number) => (n + h * 12) % 12;
+    const m = s * Math.min(l, 1 - l);
+    const f = (n: number) => 255 * (l - m * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)));
+    return [f(0), f(8), f(4)];
   }
 
   /** A tab lens's maps for a capsule: how far each point reaches in, across and down, and where it bends at all. */

@@ -1,3 +1,12 @@
+// A lens lifting off a thumb pops a little past its size and settles, and drops back with a
+// small bounce, so it reads as something with weight rather than a fade (2026-11-18; owner:
+// the animations "feel still a little bit too generic and static"). Damping ratios of about
+// 0.6 and 0.7; chosen by eye against recordings of iOS 27.
+/** Stiffness and damping of a lens lifting. */
+export const LIFT = [1400, 46] as const;
+/** Stiffness and damping of a lens dropping back. */
+export const DROP = [520, 32] as const;
+
 export interface Spring {
   paint(): void;
   set(target: number, instant?: boolean): void;

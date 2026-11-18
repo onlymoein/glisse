@@ -22,7 +22,9 @@
 .lg-slider-fill {
   display: block;
   height: 100%;
-  width: calc(var(--lg-progress) * 100%);
+  /* To the thumb's middle, wherever it's drawn: half a thumb in, the rest of the track by
+     the value, and however far the thumb trails a finger. At rest the face covers it. */
+  width: calc(18.5px + (100% - 37px) * var(--lg-progress) + var(--lg-shift, 0px));
   border-radius: 3px;
   background: var(--lg-fill);
 }

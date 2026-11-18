@@ -40,3 +40,19 @@
   border-radius: inherit;
   background: #fff;
 }
+
+/* A held lens carries a soft sheen up by its lit corner, which drifts against the way it's
+   moving and comes back when it stops, so the light seems to sit on the glass rather than be
+   printed on it. */
+.lg-switch-thumb::after,
+.lg-slider-thumb::after,
+.lg-segmented-lens::after {
+  background: radial-gradient(
+    ellipse 62% 48% at calc(34% - 16% * var(--lg-glint, 0)) 20%,
+    rgb(255 255 255 / 0.34),
+    rgb(255 255 255 / 0.1) 55%,
+    transparent 75%
+  );
+  opacity: var(--lg-lift, 0);
+  transition: none;
+}

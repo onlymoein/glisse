@@ -13,7 +13,7 @@ import { cx } from "./internal/cx";
 import { held } from "./internal/hold";
 import { createJelly, FLAT } from "./internal/jelly";
 import { useRefraction } from "./internal/refraction";
-import { createSpring, type Spring } from "./internal/spring";
+import { createSpring, DROP, LIFT, type Spring } from "./internal/spring";
 import { useStyles } from "./internal/styles";
 import buttonCss from "./styles/button.css?inline";
 import thumbCss from "./styles/thumb.css?inline";
@@ -86,7 +86,7 @@ export const Switch: ForwardRefExoticComponent<SwitchProps & RefAttributes<HTMLB
     const color = createSpring(initial, 300, 35, (value) => {
       fill.style.opacity = String(unit(value));
     });
-    const lift = createSpring(0, 2000, 80, (value) => {
+    const lift = createSpring(0, ...LIFT, (value) => {
       scale = 0.627 + 0.373 * value;
       face.style.opacity = String(1 - unit(value));
       thumb.style.setProperty("--lg-lift", String(unit(value)));
@@ -110,7 +110,7 @@ export const Switch: ForwardRefExoticComponent<SwitchProps & RefAttributes<HTMLB
     const lower = (from: number) => {
       clearTimeout(linger);
       linger = window.setTimeout(() => {
-        lift.tune(600, 49);
+        lift.tune(...DROP);
         lift.set(0);
       }, Math.max(0, LENS_MS - (performance.now() - from)));
     };
@@ -140,7 +140,7 @@ export const Switch: ForwardRefExoticComponent<SwitchProps & RefAttributes<HTMLB
       };
       el.setPointerCapture(event.pointerId);
       clearTimeout(linger);
-      lift.tune(2000, 80);
+      lift.tune(...LIFT);
       lift.set(1);
     };
 
