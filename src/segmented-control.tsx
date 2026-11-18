@@ -44,6 +44,9 @@ const SLOP = 4;
 const LINGER = 240;
 // A tapped choice is reached by the lens, which settles flat when it arrives. Measured on iOS.
 const FLIGHT = 300;
+// How long a controlled owner has to take up a choice (a router navigating, say) before the
+// thumb goes back to the one it still has.
+const PATIENCE = 2500;
 
 /** A row of mutually exclusive choices, with a thumb that slides to the chosen one and lifts into a lens under a finger. */
 export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps & RefAttributes<HTMLDivElement>> =
@@ -59,6 +62,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
     const spring = useRef<Spring | null>(null);
     const dragged = useRef(false);
     const fly = useRef<() => void>(() => {});
+    const choose = useRef<(i: number) => void>(() => {});
     const index = Math.max(0, items.findIndex((item) => item.value === value));
     const latest = useRef({ items, index, setValue });
     useImperativeHandle(ref, () => rootRef.current!);
@@ -125,6 +129,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
       spring.current = motion;
 
       let linger = 0;
+      let waiting = 0;
       let heldAt = 0;
       const hold = () => {
         clearTimeout(linger);
@@ -148,6 +153,19 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
           lift.tune(...DROP);
           lift.set(0);
         }, FLIGHT);
+      };
+
+      // A choice is shown at once and kept while the owner takes it up, which may be after a
+      // navigation, not a render: going back to the old one in between and then forward again
+      // read as the control fighting the finger. Only an owner that never takes it up sends it back.
+      choose.current = (i: number) => {
+        const { items: all, index: current, setValue: set } = latest.current;
+        const item = all[i];
+        clearTimeout(waiting);
+        motion.set(i);
+        if (!item || i === current) return;
+        waiting = window.setTimeout(() => motion.set(latest.current.index), PATIENCE);
+        set(item.value);
       };
 
       // The thumb is taken hold of, not the track, and moves by as much as the finger does.
@@ -190,13 +208,12 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
         pressing = false;
         if (event.pointerId !== drag?.id) return;
         drag = null;
-        const { items: all, index: current, setValue: set } = latest.current;
         if (dragged.current && event.type === "pointerup") {
-          const chosen = all[nearest(at)];
-          if (chosen && all.indexOf(chosen) !== current) set(chosen.value);
+          choose.current(nearest(at));
+          return;
         }
-        // Back to the chosen one, wherever it let go. A controlled owner may have said no.
-        queueMicrotask(() => motion.set(latest.current.index));
+        // Back to the chosen one, wherever it let go.
+        motion.set(latest.current.index);
       };
 
       root.addEventListener("pointerdown", down);
@@ -205,6 +222,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
       window.addEventListener("pointercancel", up);
       return () => {
         clearTimeout(linger);
+        clearTimeout(waiting);
         root.removeEventListener("pointerdown", down);
         root.removeEventListener("pointermove", moved);
         window.removeEventListener("pointerup", up);
@@ -217,6 +235,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // The owner took up a choice, or made one of its own.
     useEffect(() => {
       spring.current?.set(index);
     }, [index]);
@@ -258,7 +277,7 @@ export const SegmentedControl: ForwardRefExoticComponent<SegmentedControlProps &
               // The click that ends a drag has already chosen.
               if (!dragged.current && i !== index) {
                 fly.current();
-                setValue(item.value);
+                choose.current(i);
               }
               dragged.current = false;
             }}
